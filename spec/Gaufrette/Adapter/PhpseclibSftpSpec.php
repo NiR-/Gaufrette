@@ -71,15 +71,18 @@ class PhpseclibSftpSpec extends ObjectBehavior
 
     /**
      * @param \spec\Gaufrette\Adapter\SFTP $sftp
+     * @param Gaufrette\Content            $content
      */
-    function it_creates_and_writes_file($sftp)
+    function it_creates_and_writes_file($sftp, $content)
     {
+        $content->getFullContent()->willReturn('some content');
+
         $sftp->pwd()->willReturn('/home/l3l0');
         $sftp->chdir('/home/l3l0')->willReturn(true);
         $sftp->put('/home/l3l0/filename', 'some content')->willReturn(true);
         $sftp->size('/home/l3l0/filename')->willReturn(12);
 
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
     /**

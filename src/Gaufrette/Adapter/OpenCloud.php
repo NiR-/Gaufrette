@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\Util;
 use Guzzle\Http\Exception\BadResponseException;
 use OpenCloud\Common\Exceptions\DeleteError;
@@ -97,22 +98,19 @@ class OpenCloud implements Adapter,
     }
 
     /**
-     * Writes the given content into the file.
-     *
-     * @param string $key
-     * @param string $content
-     *
-     * @return int|bool The number of bytes that were written into the file
+     * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
+        $rawContent = $content->getFullContent();
+
         try {
-            $this->getContainer()->uploadObject($key, $content);
+            $this->getContainer()->uploadObject($key, $rawContent);
         } catch (CreateUpdateError $updateError) {
             return false;
         }
 
-        return Util\Size::fromContent($content);
+        return Util\Size::fromContent($rawContent);
     }
 
     /**
@@ -200,7 +198,9 @@ class OpenCloud implements Adapter,
      */
     public function rename($sourceKey, $targetKey)
     {
-        if (false !== $this->write($targetKey, $this->read($sourceKey))) {
+        $content = Content::fromString($this->read($sourceKey));
+
+        if (false !== $this->write($targetKey, $content)) {
             $this->delete($sourceKey);
 
             return true;

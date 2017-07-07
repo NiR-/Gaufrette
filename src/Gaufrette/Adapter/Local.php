@@ -2,6 +2,7 @@
 
 namespace Gaufrette\Adapter;
 
+use Gaufrette\Content;
 use Gaufrette\Util;
 use Gaufrette\Adapter;
 use Gaufrette\Stream;
@@ -63,12 +64,12 @@ class Local implements Adapter,
      * @throws \InvalidArgumentException if the directory already exists
      * @throws \RuntimeException         if the directory could not be created
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $path = $this->computePath($key);
         $this->ensureDirectoryExists(\Gaufrette\Util\Path::dirname($path), true);
 
-        return file_put_contents($path, $content);
+        return file_put_contents($path, $content->getFullContent());
     }
 
     /**

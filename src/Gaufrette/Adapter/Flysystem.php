@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\Exception\UnsupportedAdapterMethodException;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Util;
@@ -40,9 +41,9 @@ class Flysystem implements Adapter, ListKeysAware
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
-        return $this->adapter->write($key, $content, $this->config);
+        return $this->adapter->write($key, $content->getFullContent(), $this->config);
     }
 
     /**

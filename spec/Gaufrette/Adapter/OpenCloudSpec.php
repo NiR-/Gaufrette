@@ -58,28 +58,29 @@ class OpenCloudSpec extends ObjectBehavior
     /**
      * @param OpenCloud\ObjectStore\Resource\Container  $container
      * @param OpenCloud\ObjectStore\Resource\DataObject $object
+     * @param Gaufrette\Content                         $content
      */
-    function it_writes_file_returns_size($container, $object)
+    function it_writes_file_returns_size($container, $object, $content)
     {
-        $testData     = "Hello World!";
-        $testDataSize = strlen($testData);
+        $content->getFullContent()->willReturn('some content');
+        $object->getContentLength()->willReturn(12);
 
-        $object->getContentLength()->willReturn($testDataSize);
-        $container->uploadObject('test', $testData)->willReturn($object);
+        $container->uploadObject('test', 'some content')->willReturn($object);
 
-        $this->write('test', $testData)->shouldReturn($testDataSize);
+        $this->write('test', $content)->shouldReturn(12);
     }
 
     /**
-     * @param OpenCloud\ObjectStore\Resource\Container  $container
+     * @param OpenCloud\ObjectStore\Resource\Container $container
+     * @param Gaufrette\Content                        $content
      */
-    function it_writes_file_and_write_fails_returns_false($container)
+    function it_writes_file_and_write_fails_returns_false($container, $content)
     {
-        $testData = "Hello World!";
+        $content->getFullContent()->willReturn('some content');
 
-        $container->uploadObject('test', $testData)->willThrow(new CreateUpdateError());
+        $container->uploadObject('test', 'some content')->willThrow(new CreateUpdateError());
 
-        $this->write('test', $testData)->shouldReturn(false);
+        $this->write('test', $content)->shouldReturn(false);
     }
 
     /**

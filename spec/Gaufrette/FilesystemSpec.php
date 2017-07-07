@@ -2,6 +2,7 @@
 
 namespace spec\Gaufrette;
 
+use Gaufrette\Content;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
@@ -147,7 +148,7 @@ class FilesystemSpec extends ObjectBehavior
     function it_writes_content_to_new_file($adapter)
     {
         $adapter->exists('filename')->shouldBeCalled()->willReturn(false);
-        $adapter->write('filename', 'some content to write')->shouldBeCalled()->willReturn(21);
+        $adapter->write('filename', Argument::type(Content::class))->shouldBeCalled()->willReturn(21);
 
         $this->write('filename', 'some content to write')->shouldReturn(21);
     }
@@ -157,7 +158,7 @@ class FilesystemSpec extends ObjectBehavior
      */
     function it_updates_content_of_file($adapter)
     {
-        $adapter->write('filename', 'some content to write')->shouldBeCalled()->willReturn(21);
+        $adapter->write('filename', Argument::type(Content::class))->shouldBeCalled()->willReturn(21);
 
         $this->write('filename', 'some content to write', true)->shouldReturn(21);
     }
@@ -168,7 +169,7 @@ class FilesystemSpec extends ObjectBehavior
     function it_does_not_update_content_of_file_when_file_cannot_be_overwriten($adapter)
     {
         $adapter->exists('filename')->willReturn(true);
-        $adapter->write('filename', 'some content to write')->shouldNotBeCalled();
+        $adapter->write('filename', Argument::type(Content::class))->shouldNotBeCalled();
 
         $this
             ->shouldThrow(new \Gaufrette\Exception\FileAlreadyExists('filename'))
@@ -182,7 +183,7 @@ class FilesystemSpec extends ObjectBehavior
     function it_fails_when_write_is_not_successful($adapter)
     {
         $adapter->exists('filename')->willReturn(false);
-        $adapter->write('filename', 'some content to write')->shouldBeCalled()->willReturn(false);
+        $adapter->write('filename', Argument::type(Content::class))->shouldBeCalled()->willReturn(false);
 
         $this
             ->shouldThrow(new \RuntimeException('Could not write the "filename" key content.'))

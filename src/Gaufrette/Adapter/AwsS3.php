@@ -5,6 +5,7 @@ namespace Gaufrette\Adapter;
 use Aws\S3\Exception\S3Exception;
 use Gaufrette\Adapter;
 use Aws\S3\S3Client;
+use Gaufrette\Content;
 use Gaufrette\Exception\FileNotFound;
 use Gaufrette\Exception\StorageFailure;
 use Gaufrette\Util;
@@ -139,10 +140,10 @@ class AwsS3 implements Adapter,
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $this->ensureBucketExists();
-        $options = $this->getOptions($key, ['Body' => $content]);
+        $options = $this->getOptions($key, ['Body' => $content->getFullContent()    ]);
 
         /*
          * If the ContentType was not already set in the metadata, then we autodetect

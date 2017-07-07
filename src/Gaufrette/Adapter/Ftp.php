@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\File;
 use Gaufrette\Filesystem;
 
@@ -77,7 +78,7 @@ class Ftp implements Adapter,
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $this->ensureDirectoryExists($this->directory, $this->create);
 
@@ -87,7 +88,7 @@ class Ftp implements Adapter,
         $this->ensureDirectoryExists($directory, true);
 
         $temp = fopen('php://temp', 'r+');
-        $size = fwrite($temp, $content);
+        $size = fwrite($temp, $content->getFullContent());
         rewind($temp);
 
         if (!ftp_fput($this->getConnection(), $path, $temp, $this->mode)) {

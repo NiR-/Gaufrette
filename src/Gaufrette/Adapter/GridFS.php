@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use MongoDB\BSON\Regex;
 use MongoDB\GridFS\Bucket;
 use MongoDB\GridFS\Exception\FileNotFoundException;
@@ -54,12 +55,12 @@ class GridFS implements Adapter,
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $stream = $this->bucket->openUploadStream($key, ['metadata' => $this->getMetadata($key)]);
 
         try {
-            return fwrite($stream, $content);
+            return fwrite($stream, $content->getFullContent());
         } finally {
             fclose($stream);
         }

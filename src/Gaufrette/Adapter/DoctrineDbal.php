@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\Util;
 use Doctrine\DBAL\Connection;
 
@@ -119,12 +120,14 @@ class DoctrineDbal implements Adapter,
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
+        $rawContent = $content->getFullContent();
+
         $values = array(
-            $this->getQuotedColumn('content') => $content,
+            $this->getQuotedColumn('content') => $rawContent,
             $this->getQuotedColumn('mtime') => time(),
-            $this->getQuotedColumn('checksum') => Util\Checksum::fromContent($content),
+            $this->getQuotedColumn('checksum') => Util\Checksum::fromContent($rawContent),
         );
 
         if ($this->exists($key)) {
@@ -138,7 +141,7 @@ class DoctrineDbal implements Adapter,
             $this->connection->insert($this->table, $values);
         }
 
-        return Util\Size::fromContent($content);
+        return Util\Size::fromContent($rawContent);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace spec\Gaufrette\Adapter;
 
+use Gaufrette\Content;
 use PhpSpec\ObjectBehavior;
 
 class InMemorySpec extends ObjectBehavior
@@ -34,9 +35,10 @@ class InMemorySpec extends ObjectBehavior
         $this->read('filename')->shouldReturn('content');
     }
 
-    function it_writes_file()
+    function it_writes_file(Content $content)
     {
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $content->getFullContent()->willReturn('some content');
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
     function it_renames_file()

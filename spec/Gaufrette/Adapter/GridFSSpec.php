@@ -2,6 +2,7 @@
 
 namespace spec\Gaufrette\Adapter;
 
+use Gaufrette\Content;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\GridFS\Bucket;
 use MongoDB\GridFS\Exception\FileNotFoundException;
@@ -100,7 +101,7 @@ class GridFSSpec extends ObjectBehavior
         $this->delete('filename')->shouldReturn(false);
     }
 
-    function it_writes_file($bucket)
+    function it_writes_file($bucket, Content $content)
     {
         $this->resources[] = $writable = fopen('php://memory', 'rw');
 
@@ -108,10 +109,11 @@ class GridFSSpec extends ObjectBehavior
             ->openUploadStream('filename', ['metadata' => ['someother' => 'metadata']])
             ->willReturn($writable)
         ;
+        $content->getFullContent()->willReturn('some content');
 
         $this->setMetadata('filename', ['someother' => 'metadata']);
         $this
-            ->write('filename', 'some content')
+            ->write('filename', $content)
             ->shouldReturn(12)
         ;
     }

@@ -2,6 +2,7 @@
 
 namespace spec\Gaufrette\Adapter;
 
+use Gaufrette\Content;
 use org\bovigo\vfs\vfsStream;
 use PhpSpec\ObjectBehavior;
 
@@ -44,9 +45,10 @@ class LocalSpec extends ObjectBehavior
         $this->read('filename')->shouldReturn("content\n");
     }
 
-    function it_writes_file()
+    function it_writes_file(Content $content)
     {
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $content->getFullContent()->willReturn('some content');
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
     function it_renames_file()
@@ -102,7 +104,7 @@ class LocalSpec extends ObjectBehavior
         ;
     }
 
-    function it_fails_when_directory_does_not_exists()
+    function it_fails_when_directory_does_not_exists(Content $content)
     {
         $this->beConstructedWith(vfsStream::url('other'));
 
@@ -112,7 +114,7 @@ class LocalSpec extends ObjectBehavior
         ;
         $this
             ->shouldThrow(new \RuntimeException(sprintf('The directory "%s" does not exist.', vfsStream::url('other'))))
-            ->duringWrite('filename', 'some content')
+            ->duringWrite('filename', $content)
         ;
         $this
             ->shouldThrow(new \RuntimeException(sprintf('The directory "%s" does not exist.', vfsStream::url('other'))))

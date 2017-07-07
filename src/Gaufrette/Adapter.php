@@ -28,14 +28,14 @@ interface Adapter
     /**
      * Writes the given content into the file.
      *
-     * @param string $key
-     * @param string $content
+     * @param string  $key
+     * @param Content $content
      *
      * @return int The number of bytes that were written into the file
      *
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
-    public function write($key, $content);
+    public function write($key, Content $content);
 
     /**
      * Indicates whether the file exists.

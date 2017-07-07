@@ -5,6 +5,7 @@ namespace spec\Gaufrette\Adapter;
 //hack - mock php built-in functions
 require_once 'functions.php';
 
+use Gaufrette\Content;
 use PhpSpec\ObjectBehavior;
 
 class FtpSpec extends ObjectBehavior
@@ -64,14 +65,16 @@ class FtpSpec extends ObjectBehavior
         $this->read('filename2')->shouldReturn(false);
     }
 
-    function it_writes_file()
+    function it_writes_file(Content $content)
     {
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $content->getFullContent()->willReturn('some content');
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
-    function it_does_not_write_file()
+    function it_does_not_write_file(Content $content)
     {
-        $this->write('filename2', 'some content')->shouldReturn(false);
+        $content->getFullContent()->willReturn('some content');
+        $this->write('filename2', $content)->shouldReturn(false);
     }
 
     function it_renames_file()

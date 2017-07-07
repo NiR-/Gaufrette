@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\Util;
 
 /**
@@ -82,18 +83,22 @@ class InMemory implements Adapter,
         $content = $this->read($sourceKey);
         $this->delete($sourceKey);
 
-        return (boolean) $this->write($targetKey, $content);
+        return (boolean) $this->write($targetKey, Content::fromString($content));
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @TODO: remove $metadata parameter
      */
-    public function write($key, $content, array $metadata = null)
+    public function write($key, Content $content, array $metadata = null)
     {
-        $this->files[$key]['content'] = $content;
+        $rawContent = $content->getFullContent();
+
+        $this->files[$key]['content'] = $rawContent;
         $this->files[$key]['mtime'] = time();
 
-        return Util\Size::fromContent($content);
+        return Util\Size::fromContent($rawContent);
     }
 
     /**

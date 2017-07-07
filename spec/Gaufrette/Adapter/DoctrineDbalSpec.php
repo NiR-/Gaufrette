@@ -55,8 +55,9 @@ class DoctrineDbalSpec extends ObjectBehavior
 
     /**
      * @param \Doctrine\DBAL\Connection $connection
+     * @param \Gaufrette\Content $content
      */
-    function it_writes_to_new_file($connection)
+    function it_writes_to_new_file($connection, $content)
     {
         $connection
             ->quoteIdentifier(Argument::any())
@@ -75,13 +76,16 @@ class DoctrineDbalSpec extends ObjectBehavior
                 ))
             ->shouldBeCalled();
 
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $content->getFullContent()->willReturn('some content');
+
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
     /**
      * @param \Doctrine\DBAL\Connection $connection
+     * @param \Gaufrette\Content $content
      */
-    function it_write_file($connection)
+    function it_write_file($connection, $content)
     {
         $connection
             ->quoteIdentifier(Argument::any())
@@ -102,7 +106,9 @@ class DoctrineDbalSpec extends ObjectBehavior
                 ))
             ->shouldBeCalled();
 
-        $this->write('filename', 'some content')->shouldReturn(12);
+        $content->getFullContent()->willReturn('some content');
+
+        $this->write('filename', $content)->shouldReturn(12);
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use phpseclib\Net\SFTP as SecLibSFTP;
 use Gaufrette\Filesystem;
 use Gaufrette\File;
@@ -55,13 +56,13 @@ class PhpseclibSftp implements Adapter,
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $this->initialize();
 
         $path = $this->computePath($key);
         $this->ensureDirectoryExists(\Gaufrette\Util\Path::dirname($path), true);
-        if ($this->sftp->put($path, $content)) {
+        if ($this->sftp->put($path, $content->getFullContent())) {
             return $this->sftp->size($path);
         }
 

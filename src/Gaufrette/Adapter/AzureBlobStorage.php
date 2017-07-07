@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Content;
 use Gaufrette\Util;
 use Gaufrette\Adapter\AzureBlobStorage\BlobProxyFactoryInterface;
 use MicrosoftAzure\Storage\Blob\Models\Blob;
@@ -180,15 +181,17 @@ class AzureBlobStorage implements Adapter,
      * @throws \RuntimeException
      * @throws \InvalidArgumentException
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
         $this->init();
         list($containerName, $key) = $this->tokenizeKey($key);
 
         $options = new CreateBlobOptions();
 
+        $rawContent = $content->getFullContent();
+
         if ($this->detectContentType) {
-            $contentType = $this->guessContentType($content);
+            $contentType = $this->guessContentType($rawContent);
 
             $options->setContentType($contentType);
         }
@@ -198,7 +201,7 @@ class AzureBlobStorage implements Adapter,
                 $this->createContainer($containerName);
             }
 
-            $this->blobProxy->createBlockBlob($containerName, $key, $content, $options);
+            $this->blobProxy->createBlockBlob($containerName, $key, $rawContent, $options);
         } catch (ServiceException $e) {
             $this->failIfContainerNotFound($e, sprintf('write content for key "%s"', $key), $containerName);
 

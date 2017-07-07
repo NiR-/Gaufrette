@@ -100,6 +100,12 @@ class Filesystem implements FilesystemInterface
             throw new Exception\FileAlreadyExists($key);
         }
 
+        if (is_string($content)) {
+            $content = Content::fromString($content);
+        } elseif (is_resource($content)) {
+            $content = Content::fromResource($content);
+        }
+
         $numBytes = $this->adapter->write($key, $content);
 
         if (false === $numBytes) {

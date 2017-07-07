@@ -2,6 +2,7 @@
 
 namespace Gaufrette\Adapter;
 
+use Gaufrette\Content;
 use ZipArchive;
 use Gaufrette\Adapter;
 use Gaufrette\Util;
@@ -52,9 +53,11 @@ class Zip implements Adapter
     /**
      * {@inheritdoc}
      */
-    public function write($key, $content)
+    public function write($key, Content $content)
     {
-        if (!$this->zipArchive->addFromString($key, $content)) {
+        $rawContent = $content->getFullContent();
+
+        if (!$this->zipArchive->addFromString($key, $rawContent)) {
             return false;
         }
 
@@ -62,7 +65,7 @@ class Zip implements Adapter
             return false;
         }
 
-        return Util\Size::fromContent($content);
+        return Util\Size::fromContent($rawContent);
     }
 
     /**
