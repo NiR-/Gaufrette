@@ -7,7 +7,6 @@ use Gaufrette\Adapter;
 use Aws\S3\S3Client;
 use Gaufrette\Exception\FileNotFound;
 use Gaufrette\Exception\StorageFailure;
-use Gaufrette\Util;
 
 /**
  * Amazon S3 adapter using the AWS SDK for PHP v2.x.
@@ -100,10 +99,6 @@ class AwsS3 implements Adapter,
 
             return (string) $object->get('Body');
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($key);
-            }
-
             throw StorageFailure::unexpectedFailure('read', ['key' => $key], $e);
         }
     }
@@ -122,12 +117,8 @@ class AwsS3 implements Adapter,
         try {
             $this->service->copyObject(array_merge($options, $this->getMetadata($targetKey)));
 
-            return $this->delete($sourceKey);
+            $this->delete($sourceKey);
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($sourceKey);
-            }
-
             throw StorageFailure::unexpectedFailure(
                 'rename',
                 ['sourceKey' => $sourceKey, 'targetKey' => $targetKey],
@@ -154,12 +145,6 @@ class AwsS3 implements Adapter,
 
         try {
             $this->service->putObject($options);
-
-            if (is_resource($content)) {
-                return Util\Size::fromResource($content);
-            }
-
-            return Util\Size::fromContent($content);
         } catch (\Exception $e) {
             throw StorageFailure::unexpectedFailure(
                 'write',
@@ -193,10 +178,6 @@ class AwsS3 implements Adapter,
 
             return strtotime($result['LastModified']);
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($key);
-            }
-
             throw StorageFailure::unexpectedFailure('mtime', ['key' => $key], $e);
         }
     }
@@ -211,10 +192,6 @@ class AwsS3 implements Adapter,
 
             return $result['ContentLength'];
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($key);
-            }
-
             throw StorageFailure::unexpectedFailure('size', ['key' => $key], $e);
         }
     }
@@ -260,13 +237,7 @@ class AwsS3 implements Adapter,
     {
         try {
             $this->service->deleteObject($this->getOptions($key));
-
-            return true;
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($key);
-            }
-
             throw StorageFailure::unexpectedFailure('delete', ['key' => $key], $e);
         }
     }
@@ -383,10 +354,6 @@ class AwsS3 implements Adapter,
             $result = $this->service->headObject($this->getOptions($key));
             return ($result['ContentType']);
         } catch (\Exception $e) {
-            if ($e instanceof S3Exception && $e->getResponse()->getStatusCode() === 404) {
-                throw new FileNotFound($key);
-            }
-
             throw StorageFailure::unexpectedFailure('mimeType', ['key' => $key], $e);
         }
     }

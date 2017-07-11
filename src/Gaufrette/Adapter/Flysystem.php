@@ -3,11 +3,10 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
-use Gaufrette\Exception\FileNotFound;
 use Gaufrette\Exception\StorageFailure;
 use Gaufrette\Exception\UnsupportedAdapterMethodException;
 use League\Flysystem\AdapterInterface;
-use League\Flysystem\FileNotFoundException;
+use League\Flysystem\Config;
 use League\Flysystem\Util;
 
 class Flysystem implements Adapter, ListKeysAware
@@ -40,10 +39,6 @@ class Flysystem implements Adapter, ListKeysAware
         try {
             $result = $this->adapter->read($key);
         } catch (\Exception $e) {
-            if ($e instanceof FileNotFoundException) {
-                throw new FileNotFound($key, $e->getCode(), $e);
-            }
-
             throw StorageFailure::unexpectedFailure('read', ['key' => $key], $e);
         }
 
@@ -143,10 +138,6 @@ class Flysystem implements Adapter, ListKeysAware
         try {
             $result = $this->adapter->getTimestamp($key);
         } catch (\Exception $e) {
-            if ($e instanceof FileNotFoundException) {
-                throw new FileNotFound($key, $e->getCode(), $e);
-            }
-
             throw StorageFailure::unexpectedFailure('mtime', ['key' => $key], $e);
         }
 
@@ -165,10 +156,6 @@ class Flysystem implements Adapter, ListKeysAware
         try {
             $result = $this->adapter->delete($key);
         } catch (\Exception $e) {
-            if ($e instanceof FileNotFoundException) {
-                throw new FileNotFound($key, $e->getCode(), $e);
-            }
-
             throw StorageFailure::unexpectedFailure('delete', ['key' => $key], $e);
         }
 
@@ -185,10 +172,6 @@ class Flysystem implements Adapter, ListKeysAware
         try {
             $result = $this->adapter->rename($sourceKey, $targetKey);
         } catch (\Exception $e) {
-            if ($e instanceof FileNotFoundException) {
-                throw new FileNotFound($sourceKey, $e->getCode(), $e);
-            }
-
             throw StorageFailure::unexpectedFailure(
                 'rename',
                 ['sourceKey' => $sourceKey, 'targetKey' => $targetKey],

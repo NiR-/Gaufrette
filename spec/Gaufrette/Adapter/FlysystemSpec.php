@@ -5,7 +5,6 @@ namespace spec\Gaufrette\Adapter;
 use PhpSpec\ObjectBehavior;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Config;
-use League\Flysystem\FileNotFoundException;
 
 class FlysystemSpec extends ObjectBehavior
 {
@@ -29,13 +28,6 @@ class FlysystemSpec extends ObjectBehavior
         $adapter->read('filename')->willReturn(['contents' => 'Hello.']);
 
         $this->read('filename')->shouldReturn('Hello.');
-    }
-
-    function it_throws_file_not_found_exception_when_trying_to_read_an_unexisting_file(AdapterInterface $adapter)
-    {
-        $adapter->read('filename')->willThrow(new FileNotFoundException('filename'));
-
-        $this->shouldThrow('Gaufrette\Exception\FileNotFound')->duringread('filename');
     }
 
     function it_turns_exception_into_storage_failure_while_reading_a_file(AdapterInterface $adapter)
@@ -135,13 +127,6 @@ class FlysystemSpec extends ObjectBehavior
         $this->mtime('filename')->shouldReturn(1457104978);
     }
 
-    function it_throws_file_not_found_exception_when_trying_to_fetch_the_mtime_of_an_unexisting_file(AdapterInterface $adapter)
-    {
-        $adapter->getTimestamp('filename')->willThrow(new FileNotFoundException('filename'));
-
-        $this->shouldThrow('Gaufrette\Exception\FileNotFound')->duringmtime('filename');
-    }
-
     function it_turns_exception_into_storage_failure_while_getting_file_mtime(AdapterInterface $adapter)
     {
         $adapter->getTimestamp('filename')->willThrow(new \Exception('filename'));
@@ -162,14 +147,6 @@ class FlysystemSpec extends ObjectBehavior
 
         $this->delete('filename')->shouldReturn(null);
     }
-
-    function it_throws_file_not_found_exception_when_trying_to_delete_an_unexisting_file(AdapterInterface $adapter)
-    {
-        $adapter->delete('filename')->willThrow(new FileNotFoundException('filename'));
-
-        $this->shouldThrow('Gaufrette\Exception\FileNotFound')->duringdelete('filename');
-    }
-
     function it_turns_exception_into_storage_failure_while_deleting_a_file(AdapterInterface $adapter)
     {
         $adapter->delete('filename')->willThrow(new \Exception('filename'));
@@ -189,13 +166,6 @@ class FlysystemSpec extends ObjectBehavior
         $adapter->rename('oldfilename', 'newfilename')->willReturn(true);
 
         $this->rename('oldfilename', 'newfilename')->shouldReturn(null);
-    }
-
-    function it_throws_file_not_found_exception_when_trying_to_rename_an_unexisting_file(AdapterInterface $adapter)
-    {
-        $adapter->rename('oldfilename', 'newfilename')->willThrow(new FileNotFoundException('filename'));
-
-        $this->shouldThrow('Gaufrette\Exception\FileNotFound')->duringrename('oldfilename', 'newfilename');
     }
 
     function it_turns_exception_into_storage_failure_while_renaming_a_file(AdapterInterface $adapter)
