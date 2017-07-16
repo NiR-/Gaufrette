@@ -2,6 +2,7 @@
 
 namespace Gaufrette;
 
+use Gaufrette\Exception\InvalidKey;
 use Gaufrette\Exception\StorageFailure;
 
 /**
@@ -19,6 +20,7 @@ interface Adapter
      *
      * @return string
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function read($key);
@@ -29,6 +31,7 @@ interface Adapter
      * @param string $key
      * @param string $content
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function write($key, $content);
@@ -40,6 +43,7 @@ interface Adapter
      *
      * @return bool
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function exists($key);
@@ -60,6 +64,7 @@ interface Adapter
      *
      * @return int An UNIX like timestamp
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function mtime($key);
@@ -69,6 +74,7 @@ interface Adapter
      *
      * @param string $key
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function delete($key);
@@ -79,6 +85,7 @@ interface Adapter
      * @param string $sourceKey
      * @param string $targetKey
      *
+     * @throws InvalidKey     If $sourceKey and/or $targetKey are malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function rename($sourceKey, $targetKey);
@@ -90,6 +97,7 @@ interface Adapter
      *
      * @return bool
      *
+     * @throws InvalidKey     If $key is malformed
      * @throws StorageFailure If the underlying storage fails (adapter should not leak exceptions)
      */
     public function isDirectory($key);
