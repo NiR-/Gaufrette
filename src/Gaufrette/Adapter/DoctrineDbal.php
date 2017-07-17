@@ -3,6 +3,7 @@
 namespace Gaufrette\Adapter;
 
 use Gaufrette\Adapter;
+use Gaufrette\Exception\StorageFailure;
 use Gaufrette\Util;
 use Doctrine\DBAL\Connection;
 
@@ -43,14 +44,17 @@ class DoctrineDbal implements Adapter,
      */
     public function keys()
     {
-        $keys = array();
-        $stmt = $this->connection->executeQuery(sprintf(
-            'SELECT %s FROM %s',
-            $this->getQuotedColumn('key'),
-            $this->getQuotedTable()
-        ));
+        try {
+            $stmt = $this->connection->executeQuery(sprintf(
+                'SELECT %s FROM %s',
+                $this->getQuotedColumn('key'),
+                $this->getQuotedTable()
+            ));
 
-        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('keys', [], $e);
+        }
     }
 
     /**
@@ -58,11 +62,18 @@ class DoctrineDbal implements Adapter,
      */
     public function rename($sourceKey, $targetKey)
     {
-        return (boolean) $this->connection->update(
-            $this->table,
-            array($this->getQuotedColumn('key') => $targetKey),
-            array($this->getQuotedColumn('key') => $sourceKey)
-        );
+        try {
+            $this->connection->update(
+                $this->table,
+                array($this->getQuotedColumn('key') => $targetKey),
+                array($this->getQuotedColumn('key') => $sourceKey)
+            );
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('rename', [
+                'sourceKey' => $sourceKey,
+                'targetKey' => $targetKey,
+            ], $e);
+        }
     }
 
     /**
@@ -70,7 +81,11 @@ class DoctrineDbal implements Adapter,
      */
     public function mtime($key)
     {
-        return $this->getColumnValue($key, 'mtime');
+        try {
+            return $this->getColumnValue($key, 'mtime');
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('mtime', ['key' => $key], $e);
+        }
     }
 
     /**
@@ -78,7 +93,11 @@ class DoctrineDbal implements Adapter,
      */
     public function checksum($key)
     {
-        return $this->getColumnValue($key, 'checksum');
+        try {
+            return $this->getColumnValue($key, 'checksum');
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('checksum', ['key' => $key], $e);
+        }
     }
 
     /**
@@ -86,15 +105,19 @@ class DoctrineDbal implements Adapter,
      */
     public function exists($key)
     {
-        return (boolean) $this->connection->fetchColumn(
-            sprintf(
-                'SELECT COUNT(%s) FROM %s WHERE %s = :key',
-                $this->getQuotedColumn('key'),
-                $this->getQuotedTable(),
-                $this->getQuotedColumn('key')
-            ),
-            array('key' => $key)
-        );
+        try {
+            return (bool) $this->connection->fetchColumn(
+                sprintf(
+                    'SELECT COUNT(%s) FROM %s WHERE %s = :key',
+                    $this->getQuotedColumn('key'),
+                    $this->getQuotedTable(),
+                    $this->getQuotedColumn('key')
+                ),
+                array('key' => $key)
+            );
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('exists', ['key' => $key], $e);
+        }
     }
 
     /**
@@ -102,7 +125,11 @@ class DoctrineDbal implements Adapter,
      */
     public function read($key)
     {
-        return $this->getColumnValue($key, 'content');
+        try {
+            return $this->getColumnValue($key, 'content');
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('read', ['key' => $key], $e);
+        }
     }
 
     /**
@@ -110,10 +137,14 @@ class DoctrineDbal implements Adapter,
      */
     public function delete($key)
     {
-        return (boolean) $this->connection->delete(
-            $this->table,
-            array($this->getQuotedColumn('key') => $key)
-        );
+        try {
+            $this->connection->delete(
+                $this->table,
+                array($this->getQuotedColumn('key') => $key)
+            );
+        } catch (\Exception $e) {
+            throw StorageFailure::unexpectedFailure('delete', ['key' => $key], $e);
+        }
     }
 
     /**
@@ -127,6 +158,19 @@ class DoctrineDbal implements Adapter,
             $this->getQuotedColumn('checksum') => Util\Checksum::fromContent($content),
         );
 
+        try {
+            $this->upsert($key, $values);
+        } catch (\Exception $e) {
+            if ($e instanceof StorageFailure) {
+                throw $e;
+            }
+
+            throw StorageFailure::unexpectedFailure('write', ['key' => $key], $e);
+        }
+    }
+
+    private function upsert($key, array $values)
+    {
         if ($this->exists($key)) {
             $this->connection->update(
                 $this->table,
@@ -137,12 +181,12 @@ class DoctrineDbal implements Adapter,
             $values[$this->getQuotedColumn('key')] = $key;
             $this->connection->insert($this->table, $values);
         }
-
-        return Util\Size::fromContent($content);
     }
 
     /**
      * {@inheritdoc}
+     *
+     * @TODO: should behave like AwsS3
      */
     public function isDirectory($key)
     {
