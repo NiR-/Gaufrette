@@ -4,7 +4,7 @@ namespace Gaufrette\Functional\FileStream;
 
 use Gaufrette\StreamWrapper;
 
-class FunctionalTestCase extends \PHPUnit_Framework_TestCase
+abstract class FunctionalTestCase extends \PHPUnit_Framework_TestCase
 {
     protected $filesystem;
 
@@ -202,6 +202,31 @@ class FunctionalTestCase extends \PHPUnit_Framework_TestCase
     {
         $fileHandler = fopen('gaufrette://filestream/test.txt', $mode);
         $this->assertTrue(file_exists('gaufrette://filestream/test.txt'));
+    }
+
+    /**
+     * @test
+     */
+    public function shouldHandleFilesWithSpecialCharacters()
+    {
+        $strings = [
+            'ñóǹ äŝçíì',
+            '汉语漢語',
+            '华语華語',
+            'Huáyǔ;',
+            '中文',
+            'Zhōngwén',
+            '漢字仮名交じり文',
+            'Lech Wałęsa',
+            'æøå',
+        ];
+        foreach ($strings as $string) {
+            $this->filesystem->write("$string.txt", 'some content');
+            $this->assertTrue(is_file("gaufrette://filestream/$string.txt"));
+
+            $this->filesystem->delete("$string.txt");
+            $this->assertFalse(is_file("gaufrette://filestream/$string.txt"));
+        }
     }
 
     public static function modesProvider()
