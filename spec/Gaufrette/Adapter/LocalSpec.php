@@ -14,7 +14,7 @@ class LocalSpec extends ObjectBehavior
         vfsStream::setup('test');
         vfsStream::copyFromFileSystem(__DIR__.'/MockFilesystem');
 
-        $this->beConstructedWith(vfsStream::url('test'), true);
+        $this->beConstructedWith(vfsStream::url('test'));
     }
 
     function it_is_adapter()

@@ -27,13 +27,11 @@ class Local implements Adapter,
 
     /**
      * @param string $directory Directory where the filesystem is located
-     * @param bool   $create    Whether to create the directory if it does not
-     *                          exist (default FALSE)
-     * @param int    $mode      Mode for mkdir
+     * @param int    $mode      Mode of directory created by the adapter.
      *
      * @throws StorageFailure When the specified directory doesn't exists and can't be created.
      */
-    public function __construct($directory, $create = false, $mode = 0777)
+    public function __construct($directory, $mode = 0777)
     {
         $this->mode = $mode;
         $this->directory = Util\Path::normalize($directory);
@@ -42,9 +40,7 @@ class Local implements Adapter,
             $this->directory = realpath($this->directory);
         }
 
-        if ($create) {
-            $this->ensureDirectoryExists('');
-        }
+        $this->ensureDirectoryExists('');
     }
 
     /**
