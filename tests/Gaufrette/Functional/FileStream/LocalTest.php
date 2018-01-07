@@ -12,9 +12,11 @@ class LocalTest extends FunctionalTestCase
 
     public function setUp()
     {
-        $this->directory = __DIR__.DIRECTORY_SEPARATOR.'filesystem';
+        $this->directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('gaufrette-tests');
+
         @mkdir($this->directory.DIRECTORY_SEPARATOR.'subdir', 0777, true);
         umask(0002);
+
         $this->filesystem = new Filesystem(new LocalAdapter($this->directory, 0770));
 
         $this->registerLocalFilesystemInStream();
